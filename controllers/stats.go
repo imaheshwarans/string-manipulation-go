@@ -1,0 +1,41 @@
+package controllers
+
+import "net/http"
+
+type Stats struct{}
+
+type StatsResponse struct {
+	Total       int      `json:"num-of-strings"`
+	Shortest    string   `json:"shortest-string"`
+	Longest     string   `json:"longest-string"`
+	Palindromes []string `json:"palidromes"`
+	MostUsed    string   `json:"most-used"`
+}
+
+func (st Stats) GetStats(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
+	mu.Lock()
+	defer mu.Unlock()
+	var response StatsResponse
+	response.Total = len(strList)
+	mostlyUsed := collection[strList[0]].Count
+
+	for _, value := range strList {
+
+		property := collection[value]
+		if property.Shortest {
+			response.Shortest = value
+		}
+		if property.Longest {
+			response.Longest = value
+		}
+		if property.Palindrome {
+			response.Palindromes = append(response.Palindromes, value)
+		}
+		if property.Count > mostlyUsed {
+			mostlyUsed = property.Count
+			response.MostUsed = value
+		}
+	}
+
+	return response, http.StatusOK, nil
+}
