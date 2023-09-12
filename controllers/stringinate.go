@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"stringinator-go/config"
 	"stringinator-go/constants"
 	"stringinator-go/models"
 	"stringinator-go/utils"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type StringInate struct{}
@@ -36,14 +38,15 @@ var strList []string
 var collection map[string]Property
 var mu *sync.Mutex
 
-var defaultLog = utils.ConfigureLogs()
-
+var defaultLog *logrus.Logger
 var sleepTime = 10 * time.Second
 
 func init() {
+	config, _ := config.LoadConfiguration()
+	defaultLog = utils.ConfigureLogs(config.LogLevel)
 
-	defaultLog.Println("controller/stringinate.go init() entering")
-	defer defaultLog.Println("controller/stringinate.go init() Leaving")
+	defaultLog.Info("controller/stringinate.go init() entering")
+	defer defaultLog.Info("controller/stringinate.go init() Leaving")
 	mu = &sync.Mutex{}
 
 	collection = make(map[string]Property)

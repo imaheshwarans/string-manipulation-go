@@ -8,5 +8,7 @@ const (
 
 //
 const (
-	LogFile = "app.log"
+	LogFile    = "app.log"
+	ConfigFile = "config.yaml"
+	ConfigDir  = "D:\\Comcast-Delivery-interview-exercise\\string-manipulation-go\\log"
 )

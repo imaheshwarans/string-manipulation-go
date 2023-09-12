@@ -2,9 +2,10 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"stringinator-go/constants"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func openLogFiles() (logFile *os.File, err error) {
@@ -20,12 +21,18 @@ func openLogFiles() (logFile *os.File, err error) {
 	return
 }
 
-func ConfigureLogs() *log.Logger {
+func ConfigureLogs(level string) *log.Logger {
 	logFile, err := openLogFiles()
 	if err != nil {
 		fmt.Println("Failed to open log file")
 	}
 
 	log.SetOutput(logFile)
-	return log.Default()
+	l := log.New()
+	lv, err := log.ParseLevel(level)
+	if err != nil {
+		fmt.Println("Failed to parse log level")
+	}
+	l.SetLevel(lv)
+	return l
 }
