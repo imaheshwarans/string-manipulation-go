@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-go run app.go
+go run main.go server.go

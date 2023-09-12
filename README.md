@@ -1,10 +1,10 @@
 # The GoLang service implementation
 
-This repo contains a small [Echo](https://echo.labstack.com/) application containing the initial API endpoints.
+This repo contains a small application containing the initial API endpoints.
 
 ## Setup
 
-Clone the repo, make sure you have golang => 1.16 installed, and then run `./install.sh`.
+Clone the repo, make sure you have golang => 1.16 installed, and then run `go mod tidy`.
 
 Once the dependency install has completed, execute `./run.sh` to launch the application.
 

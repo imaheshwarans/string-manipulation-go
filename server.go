@@ -22,7 +22,7 @@ func (a *App) startServer() {
 
 	router := router.InitRoutes()
 
-	err := http.ListenAndServe(":8888", router)
+	err := http.ListenAndServe(":1323", router)
 	if err != nil {
 		fmt.Println("Failed to start server")
 	}
