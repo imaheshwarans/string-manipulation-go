@@ -15,10 +15,10 @@ type StatsResponse struct {
 func (st Stats) GetStats(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
 	var response StatsResponse
 	response.Total = len(strList)
-	mostlyUsed := collection[strList[0]].Count
 
 	allShortestStrings()
 	allLongestStrings()
+	mostUsedString()
 
 	for _, value := range strList {
 
@@ -32,10 +32,8 @@ func (st Stats) GetStats(w http.ResponseWriter, r *http.Request) (interface{}, i
 		if property.Palindrome {
 			response.Palindromes = append(response.Palindromes, value)
 		}
-		if property.Count > mostlyUsed {
-			mostlyUsed = property.Count
-			response.MostUsed = value
-		}
+
+		response.MostUsed = mostUsed
 	}
 
 	return response, http.StatusOK, nil
