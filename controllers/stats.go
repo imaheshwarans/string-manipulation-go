@@ -13,11 +13,12 @@ type StatsResponse struct {
 }
 
 func (st Stats) GetStats(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
-	mu.Lock()
-	defer mu.Unlock()
 	var response StatsResponse
 	response.Total = len(strList)
 	mostlyUsed := collection[strList[0]].Count
+
+	allShortestStrings()
+	allLongestStrings()
 
 	for _, value := range strList {
 

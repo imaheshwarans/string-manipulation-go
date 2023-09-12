@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,9 +19,9 @@ type StringInate struct{}
 type Property struct {
 	Count      int  `json:"count"`
 	Length     int  `json:"length"`
-	Palindrome bool `json:"palindrome"`
-	Shortest   bool `json:"shortest"`
-	Longest    bool `json:"longest"`
+	Palindrome bool `json:"palindrome,omitempty"`
+	Shortest   bool `json:"shortest,omitempty"`
+	Longest    bool `json:"longest,omitempty"`
 }
 
 type StringRequest struct {
@@ -40,6 +39,7 @@ var mu *sync.Mutex
 
 var defaultLog *logrus.Logger
 var sleepTime = 10 * time.Second
+var shortest, longest, mostUsed string
 
 func init() {
 	config, _ := config.LoadConfiguration()
@@ -56,33 +56,34 @@ func init() {
 
 func allLongestStrings() {
 
+	mu.Lock()
+	defer mu.Unlock()
+
 	defaultLog.Println("controller/stringinate.go allLongestStrings() entering")
 	defer defaultLog.Println("controller/stringinate.go allLongestStrings() Leaving")
 
-	// if len(strList) == 0 {
-	// 	return
-	// }
 	defaultLog.Println("controller/stringinate.go allShortestStrings() proceeds calculating longest string")
-	mu.Lock()
 
-	var maxLength int
+	if longest != "" {
+		property := collection[longest]
+		property.Longest = false
+		collection[longest] = property
+	}
+
 	if len(strList) > 0 {
-		maxLength = len(strList[0])
+		longest = strList[0]
 	}
 
 	for _, value := range strList {
-		if len(value) > maxLength {
-			maxLength = len(value)
-			property := collection[value]
-			property.Longest = true
-
-			collection[value] = property
+		if len(value) > len(longest) {
+			longest = value
 		}
 	}
-	defaultLog.Println("controller/stringinate.go allShortestStrings() going to sleep")
-	time.Sleep(sleepTime)
+	property := collection[longest]
+	property.Longest = true
+	collection[longest] = property
 
-	mu.Unlock()
+	defaultLog.Println("controller/stringinate.go allShortestStrings() going to sleep")
 }
 
 func allShortestStrings() {
@@ -90,29 +91,29 @@ func allShortestStrings() {
 	defaultLog.Println("controller/stringinate.go allShortestStrings() entering")
 	defer defaultLog.Println("controller/stringinate.go allShortestStrings() Leaving")
 
-	// if len(strList) == 0 {
-	// 	return
-	// }
+	mu.Lock()
+	defer mu.Unlock()
+
 	defaultLog.Println("controller/stringinate.go allShortestStrings() proceeds calculating shortest string")
 
-	mu.Lock()
-	var minLength int
+	if shortest != "" {
+		property := collection[shortest]
+		property.Shortest = false
+		collection[shortest] = property
+	}
+
 	if len(strList) > 0 {
-		minLength = len(strList[0])
+		shortest = strList[0]
 	}
 
 	for _, value := range strList {
-		if len(value) < minLength {
-			minLength = len(value)
-			property := collection[value]
-			property.Shortest = true
-
-			collection[value] = property
+		if len(value) < len(shortest) {
+			shortest = value
 		}
 	}
-	time.Sleep(sleepTime)
-
-	mu.Unlock()
+	property := collection[shortest]
+	property.Shortest = true
+	collection[shortest] = property
 }
 
 func monitorStringCollection() {
@@ -120,6 +121,7 @@ func monitorStringCollection() {
 		for {
 			allShortestStrings()
 			allLongestStrings()
+			time.Sleep(sleepTime)
 		}
 	}()
 }
@@ -176,11 +178,11 @@ func (str StringInate) Create(w http.ResponseWriter, request *http.Request) (int
 }
 
 func (str StringInate) Get(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
-	// defaultLog.Trace("controllers/key_controller:Retrieve() Entering")
-	// defer defaultLog.Trace("controllers/key_controller:Retrieve() Leaving")
+	defaultLog.Trace("controllers/stringinate:Get() Entering")
+	defer defaultLog.Trace("controllers/stringinate:Get() Leaving")
 
-	input := mux.Vars(r)["input"]
-	if input != "" {
+	input := r.URL.Query().Get("input")
+	if input == "" {
 		return nil, http.StatusBadRequest, errors.New("input is missing")
 	}
 
@@ -189,6 +191,23 @@ func (str StringInate) Get(w http.ResponseWriter, r *http.Request) (interface{},
 	if property, value := collection[input]; value {
 		response.Value = input
 		response.Property = property
+	}
+
+	return response, http.StatusOK, nil
+}
+
+func (str StringInate) GetAll(w http.ResponseWriter, r *http.Request) (interface{}, int, error) {
+	defaultLog.Trace("controllers/stringinate:GetAll() Entering")
+	defer defaultLog.Trace("controllers/stringinate:GetAll() Leaving")
+
+	var response []StringResponse
+
+	for _, value := range strList {
+		resp := StringResponse{
+			Value:    value,
+			Property: collection[value],
+		}
+		response = append(response, resp)
 	}
 
 	return response, http.StatusOK, nil

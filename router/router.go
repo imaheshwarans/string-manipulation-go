@@ -13,8 +13,6 @@ func InitRoutes() *mux.Router {
 	router := mux.NewRouter()
 	router.SkipClean(true)
 
-	// router.HandleF
-
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", constants.HTTPMediaTypePlain)
 		w.WriteHeader(http.StatusOK)
