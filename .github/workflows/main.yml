@@ -1,48 +1,23 @@
-name: Github Workflow
-
+name: golangci-lint
 on:
   push:
-    branches: ['master']
-  workflow_dispatch:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
-  errcheck:
-    name: Errcheck
-    runs-on: ubuntu-latest
+  golangci:
+    name: lint
+    runs-on: comcast-ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: check
-      uses: k8s-school/golang-github-actions@v1.1.2
-      with:
-        run: errcheck
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: check
-      uses: k8s-school/golang-github-actions@v1.1.2
-      with:
-        run: lint
-
-  staticcheck:
-    name: StaticCheck
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: check
-      uses: k8s-school/golang-github-actions@v1.1.2
-      with:
-        run: staticcheck
-
-  sec:
-    name: Sec
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: check
-      uses: k8s-school/golang-github-actions@v1.1.2
-      with:
-        run: sec
-        flags: "-exclude=G104"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60.1
