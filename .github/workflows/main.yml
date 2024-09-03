@@ -1,0 +1,48 @@
+name: Github Workflow
+
+on:
+  push:
+    branches: ['master']
+  workflow_dispatch:
+
+jobs:
+  errcheck:
+    name: Errcheck
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: check
+      uses: k8s-school/golang-github-actions@v1.1.2
+      with:
+        run: errcheck
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: check
+      uses: k8s-school/golang-github-actions@v1.1.2
+      with:
+        run: lint
+
+  staticcheck:
+    name: StaticCheck
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: check
+      uses: k8s-school/golang-github-actions@v1.1.2
+      with:
+        run: staticcheck
+
+  sec:
+    name: Sec
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: check
+      uses: k8s-school/golang-github-actions@v1.1.2
+      with:
+        run: sec
+        flags: "-exclude=G104"
